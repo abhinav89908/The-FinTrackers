@@ -37,62 +37,73 @@ let user = {
   history: [],
 };
 
-app.get("/", (req, res) => {
-  res.render("index", { 
+app.get("/contact", (req, res) => {
+  res.render("contact", {
     user: user,
-    username: user.name
+    username: user.name,
+  });
+});
+app.get("/about", (req, res) => {
+  res.render("about", {
+    user: user,
+    username: user.name,
+  });
+});
+app.get("/index", (req, res) => {
+  res.render("index");
+});
+app.get("/", (req, res) => {
+  res.render("index", {
+    user: user,
+    username: user.name,
   });
 });
 
 app.get("/login", (req, res) => {
-  res.render("login",{
+  res.render("login", {
     user: user,
-    username: user.name
+    username: user.name,
   });
 });
 app.get("/home", (req, res) => {
-  res.render("home",{
+  res.render("home", {
     user: user,
-    username: user.name
-  });;
+    username: user.name,
+  });
 });
 
 app.get("/transactions", (req, res) => {
-  res.render("transactions",{
+  res.render("transactions", {
     user: user,
-    username: user.name
+    username: user.name,
   });
 });
 //load the addtransaction page and read the data from that based on the form name
 app.get("/addtransaction", (req, res) => {
   res.render("addtransaction", {
     user: user,
-    username: user.name
+    username: user.name,
   });
 });
 
 app.get("/success", (req, res) => {
   res.render("success", {
     user: user,
-    username: user.name
+    username: user.name,
   });
 });
 
-
 app.post("/success", async (req, res) => {
-  try{
+  try {
     res.render("success", {
       user: user,
-    username: user.name
+      username: user.name,
     });
-  }
-  catch(err){
+  } catch (err) {
     console.log(err);
-    render("404error", {err: err});
+    render("404error", { err: err });
   }
-
 });
-
 
 // Adding a new route for the addtransaction page
 app.post("/addincome", async (req, res) => {
@@ -109,18 +120,18 @@ app.post("/addincome", async (req, res) => {
   user.history.unshift(newIncome);
   user.balance = balance;
   // update the data in the database using the user object
-  try{
-  await Register.findOneAndUpdate(
-    { email: user.email },
-    {
-      $set: {
-        balance: user.balance,
-        history: user.history,
-      },
-    }
-  );
-  res.status(201).render("success");
-  }catch(err){
+  try {
+    await Register.findOneAndUpdate(
+      { email: user.email },
+      {
+        $set: {
+          balance: user.balance,
+          history: user.history,
+        },
+      }
+    );
+    res.status(201).render("success");
+  } catch (err) {
     console.log(err);
   }
 });
@@ -147,79 +158,7 @@ app.post("/addexpense", async (req, res) => {
   user.history.unshift(newExpense);
   user.balance = balance;
   // update the data in the database using the user object
-  try{
-  await Register.findOneAndUpdate(
-    { email: user.email },
-    {
-      $set: {
-        balance: user.balance,
-        history: user.history,
-      },
-    }
-  );
-  res.status(201).render("success");
-  }catch(err){
-    console.log(err);
-  }
-});
-
-
-// Adding a new route for the deltransaction page
-app.get("/deltransaction", (req, res) => {
-  res.render("deltransaction", {
-    user: user,
-    username: user.name
-  });
-});
-
-// adding a post method to update a particular record matching those values
-app.post("/updttransaction", async (req, res) => {
-    const index = req.body.index;
-    const amount = req.body.amount;
-    const category = req.body.category;
-    const date = req.body.date;
-    const description = req.body.description;
-    let type = req.body.type;
-    type = type.toLowerCase();
-
-    if(user.history.length > index){
-      let prevAmt = 0;
-      let newAmt = 0;
-      if(amount.length>0){
-        prevAmt = user.history[index].amount;
-        newAmt = parseInt(amount);
-        user.history[index].amount = parseInt(amount);
-      }
-      if(category.length>0){
-        user.history[index].category = category;
-      }
-      if(date.length>0){
-        user.history[index].date = date;
-      }
-      if(description.length>0){
-        user.history[index].description = description;
-      }
-      if(type.length>0){
-        if(type=='income'){ 
-          if(user.history[index].income==false){
-            user.balance = user.balance + newAmt - prevAmt;
-            console.log(user.history[index]);
-          }
-          user.history[index].income = true;
-        }
-        else if(type=='expense'){
-          if(user.history[index].income==true){
-            user.balance = user.balance - newAmt + parseInt(prevAmt);
-          }
-          
-          user.history[index].income = false;
-          // console.log(user.history[index]);
-        }
-      }
-
-    }
   try {
-    
     await Register.findOneAndUpdate(
       { email: user.email },
       {
@@ -230,8 +169,75 @@ app.post("/updttransaction", async (req, res) => {
       }
     );
     res.status(201).render("success");
+  } catch (err) {
+    console.log(err);
   }
-  catch(err){
+});
+
+// Adding a new route for the deltransaction page
+app.get("/deltransaction", (req, res) => {
+  res.render("deltransaction", {
+    user: user,
+    username: user.name,
+  });
+});
+
+// adding a post method to update a particular record matching those values
+app.post("/updttransaction", async (req, res) => {
+  const index = req.body.index;
+  const amount = req.body.amount;
+  const category = req.body.category;
+  const date = req.body.date;
+  const description = req.body.description;
+  let type = req.body.type;
+  type = type.toLowerCase();
+
+  if (user.history.length > index) {
+    let prevAmt = 0;
+    let newAmt = 0;
+    if (amount.length > 0) {
+      prevAmt = user.history[index].amount;
+      newAmt = parseInt(amount);
+      user.history[index].amount = parseInt(amount);
+    }
+    if (category.length > 0) {
+      user.history[index].category = category;
+    }
+    if (date.length > 0) {
+      user.history[index].date = date;
+    }
+    if (description.length > 0) {
+      user.history[index].description = description;
+    }
+    if (type.length > 0) {
+      if (type == "income") {
+        if (user.history[index].income == false) {
+          user.balance = user.balance + newAmt - prevAmt;
+          console.log(user.history[index]);
+        }
+        user.history[index].income = true;
+      } else if (type == "expense") {
+        if (user.history[index].income == true) {
+          user.balance = user.balance - newAmt + parseInt(prevAmt);
+        }
+
+        user.history[index].income = false;
+        // console.log(user.history[index]);
+      }
+    }
+  }
+  try {
+    await Register.findOneAndUpdate(
+      { email: user.email },
+      {
+        $set: {
+          balance: user.balance,
+          history: user.history,
+        },
+      }
+    );
+    res.status(201).render("success");
+  } catch (err) {
     console.log(err);
   }
 });
@@ -240,31 +246,26 @@ app.post("/updttransaction", async (req, res) => {
 app.post("/deltransaction", async (req, res) => {
   const index = req.body.index;
 
-  if(user.history.length > index){
-  //  write a javascript function to delete the element at index
-    let arr = user.history
-    arr.splice(index, 1)
+  if (user.history.length > index) {
+    //  write a javascript function to delete the element at index
+    let arr = user.history;
+    arr.splice(index, 1);
     user.history = arr;
-
   }
-try {
-  
-  await Register.findOneAndUpdate(
-    { email: user.email },
-    {
-      $set: {
-        history: user.history,
-      },
-    }
-  );
-  res.status(201).render("success");
-}
-catch(err){
-  console.log(err);
-}
+  try {
+    await Register.findOneAndUpdate(
+      { email: user.email },
+      {
+        $set: {
+          history: user.history,
+        },
+      }
+    );
+    res.status(201).render("success");
+  } catch (err) {
+    console.log(err);
+  }
 });
-
-
 
 // // adding a post method to delete a particular record matching those values
 // app.post("/deltransaction", async (req, res) => {
@@ -311,7 +312,7 @@ catch(err){
 app.get("/updttransaction", (req, res) => {
   res.render("updttransaction", {
     user: user,
-    username: user.name
+    username: user.name,
   });
 });
 
@@ -320,7 +321,8 @@ app.get("/viewtransaction", (req, res) => {
   // console.log(user.history);
   res.render("viewtransaction", {
     history: user.history,
-    user: user
+    user: user,
+    username: user.name,
   });
 });
 
@@ -328,7 +330,7 @@ app.get("/viewtransaction", (req, res) => {
 app.post("/index", (req, res) => {
   res.render("index", {
     user: user,
-    username: user.name
+    username: user.name,
   });
 });
 
@@ -382,7 +384,7 @@ app.post("/register", async (req, res) => {
       const registered = await registerUser.save();
       res.status(201).render("home", {
         user: user,
-    username: user.name,
+        username: user.name,
       });
     }
   } catch (error) {
@@ -406,12 +408,12 @@ app.post("/login", async (req, res) => {
     user.email = userLogin.email;
     user.phone = userLogin.phone;
     user.history = userLogin.history;
-    
+
     if (password === userLogin.password) {
       // console.log(user)
       res.status(201).render("home", {
         user: user,
-    username: user.name
+        username: user.name,
       });
     } else {
       res.send("Invalid Login!!!");
